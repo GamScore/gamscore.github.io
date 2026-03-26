@@ -242,6 +242,26 @@
             background: #fd7e14;
         }
 
+        .domain-card[data-domain="score"] .card-label::before {
+            background: #dc3545;
+        }
+
+        .domain-card[data-domain="education"] .card-label::before {
+            background: #20c997;
+        }
+
+        .domain-card[data-domain="report"] .card-label::before {
+            background: #ffc107;
+        }
+
+        .domain-card[data-domain="user"] .card-label::before {
+            background: #0dcaf0;
+        }
+
+        .domain-card[data-domain="financialdata"] .card-label::before {
+            background: #6610f2;
+        }
+
         /* ── Detail Panel ────────────────────────────────── */
         .detail-area {
             display: flex;
@@ -340,6 +360,28 @@
             line-height: 1.5;
         }
 
+        .detail-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 4px;
+            padding: 6px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 12px;
+            color: var(--gs-text-secondary);
+            line-height: 1.5;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-item i {
+            font-size: 18px;
+            color: var(--gs-light-blue);
+            flex-shrink: 0;
+            margin-top: -2px;
+        }
+
         /* ── Hint ────────────────────────────────────────── */
         .hint {
             font-size: 12px;
@@ -436,9 +478,9 @@
         </div>
 
         <div class="columns">
-            <!-- Col 1: Business Domain -->
+            <!-- Col 1: Domain -->
             <div class="col-panel">
-                <div class="col-head">Business Domain</div>
+                <div class="col-head">Domain</div>
                 <div class="col-scroll" id="domain-area"></div>
             </div>
 
@@ -448,9 +490,9 @@
                 </svg>
             </div>
 
-            <!-- Col 2: Business Feature -->
+            <!-- Col 2: Feature -->
             <div class="col-panel">
-                <div class="col-head">Business Feature</div>
+                <div class="col-head">Feature</div>
                 <div class="col-scroll" id="feature-area">
                     <div class="hint"><i class="bi bi-arrow-left-circle"></i>Select a domain to see its features</div>
                 </div>
@@ -496,141 +538,599 @@
         // ══════════════════════════════════════════════════
         // DATA MODEL
         // Each domain contains features, each feature has use cases,
-        // each use case has technical detail items.
+        // each use case has detail descriptions.
         // ══════════════════════════════════════════════════
         const domains = {
             budget: {
                 label: 'Budget',
                 icon: 'bi-wallet2',
-                description: 'Manage spending limits, recommendations, tracking and alerts',
+                description: 'Responsibly managing your budget, with help from our recommendation. Receiving notifications on your progress.',
                 features: {
                     set: {
                         label: 'Budget Setting',
-                        description: 'User defines spending limits per category',
+                        description: 'User sets a single overall gambling spending budget for a chosen period',
                         useCases: [
                             {
                                 id: 'set-1',
-                                label: 'User creates a budget for a new category',
+                                label: 'User creates their gambling budget',
                                 detail: [
-                                    { tag: 'entity', text: 'UserBudget — amount, category, period, timestamps' },
-                                    { tag: 'api', text: 'POST /budgets with validation (positive, valid category/period)' },
-                                    { tag: 'logic', text: 'Duplicate check — one budget per category per period' },
+                                    'The user sets a total spending limit for a chosen period (e.g. weekly, monthly).',
+                                    'The system validates the amount is positive and that a budget does not already exist for that period.',
+                                    'Once saved, the budget becomes the single reference point for all tracking and alerts.',
                                 ]
                             },
                             {
                                 id: 'set-2',
-                                label: 'User edits an existing budget',
+                                label: 'User edits their gambling budget',
                                 detail: [
-                                    { tag: 'api', text: 'PUT /budgets/:id with ownership check' },
-                                    { tag: 'event', text: 'budget.updated event → triggers remaining recalculation' },
-                                    { tag: 'logic', text: 'Divergence check fires after save' },
-                                ]
-                            },
-                            {
-                                id: 'set-3',
-                                label: 'User deletes a budget',
-                                detail: [
-                                    { tag: 'api', text: 'DELETE /budgets/:id, soft-delete for history' },
-                                    { tag: 'logic', text: 'Cascade: clear associated notification thresholds' },
+                                    'The user can update the amount or period of their existing budget.',
+                                    'Changing the budget triggers an immediate recalculation of remaining spend.',
+                                    'If the new amount differs significantly from the recommendation, a soft warning is shown.',
                                 ]
                             },
                         ]
                     },
                     rec: {
-                        label: 'Recommendation Engine',
-                        description: 'Calculates suggested budget from transaction history',
+                        label: 'Budget Recommendation',
+                        description: 'Suggests a responsible budget based on the user\'s gambling history',
                         useCases: [
                             {
                                 id: 'rec-1',
-                                label: 'System generates initial recommendations on first login',
+                                label: 'System generates a recommendation on first login',
                                 detail: [
-                                    { tag: 'svc', text: 'Transaction aggregation — group by category × period' },
-                                    { tag: 'logic', text: 'Rolling 3-month average or median spend calculation' },
-                                    { tag: 'entity', text: 'RecommendedBudget — separate from UserBudget, with confidence score' },
+                                    'The system analyses the user\'s recent gambling transaction history.',
+                                    'A recommended budget is calculated based on average or median spend over a rolling period.',
+                                    'The recommendation is presented with a confidence indicator so the user understands its basis.',
                                 ]
                             },
                             {
                                 id: 'rec-2',
-                                label: 'User requests refresh after new transactions sync',
+                                label: 'Recommendation refreshes after new activity',
                                 detail: [
-                                    { tag: 'event', text: 'transactions.synced event → triggers recalculation pipeline' },
-                                    { tag: 'svc', text: 'Diff check — only resurface recommendation if delta > threshold' },
-                                    { tag: 'api', text: 'POST /recommendations/refresh (manual trigger)' },
+                                    'When new gambling transactions are recorded, the recommendation is recalculated.',
+                                    'The user can also manually request a recommendation refresh at any time.',
                                 ]
                             },
                             {
                                 id: 'rec-3',
-                                label: 'User accepts or dismisses a recommendation',
+                                label: 'User accepts or dismisses the recommendation',
                                 detail: [
-                                    { tag: 'entity', text: 'status flag on RecommendedBudget: accepted | dismissed | pending' },
-                                    { tag: 'api', text: 'PATCH /recommendations/:id { status }' },
-                                    { tag: 'logic', text: 'On accept: pre-fill UserBudget form with recommended amount' },
+                                    'The user can accept the recommendation, which pre-fills their budget with the suggested amount.',
+                                    'Alternatively, the user can dismiss it and set their own amount.',
+                                    'Dismissed recommendations can be revisited later from the budget settings.',
+                                ]
+                            },
+                            {
+                                id: 'rec-4',
+                                label: 'User asks why a budget was recommended',
+                                detail: [
+                                    'The system explains the recommendation, e.g. "Based on your last 3 months, averaging £X per month."',
+                                    'Contributing transactions can be shown for full transparency.',
+                                    'Optionally, context such as comparison to similar users may be provided.',
                                 ]
                             },
                         ]
                     },
-                    rem: {
-                        label: 'Remaining Budget Tracking',
-                        description: 'Shows real-time spend vs budget in each category',
+                    alerts: {
+                        label: 'Budget Alerts',
+                        description: 'Actionable warnings when something needs the user\'s attention',
                         useCases: [
                             {
-                                id: 'rem-1',
-                                label: 'User views remaining budget mid-period',
+                                id: 'alert-1',
+                                label: 'User has exceeded their budget',
                                 detail: [
-                                    { tag: 'logic', text: 'remaining = userBudget.amount − Σ(transactions in period) — derived, not stored' },
-                                    { tag: 'api', text: 'GET /budgets/:id/remaining — computed on read or from cache' },
-                                    { tag: 'svc', text: 'Period boundary logic — handle month/week/custom ranges' },
+                                    'When spending surpasses 100% of the budget, an alert is triggered immediately.',
+                                    'The alert shows the overspend amount and suggests reviewing recent activity.',
+                                    'The user can acknowledge the alert or adjust their budget in response.',
                                 ]
                             },
                             {
-                                id: 'rem-2',
-                                label: 'User receives alert when approaching limit',
+                                id: 'alert-2',
+                                label: 'Budget is set significantly above the recommendation',
                                 detail: [
-                                    { tag: 'svc', text: 'Notification service — threshold triggers at 80%, 100%, 110%' },
-                                    { tag: 'event', text: 'budget.threshold_crossed event → push/email dispatch' },
-                                    { tag: 'entity', text: 'NotificationPreference — per user, per threshold, per channel' },
+                                    'When the user sets a budget that exceeds the recommendation by a notable margin, a warning is displayed.',
+                                    'The warning explains the recommendation basis and why the chosen amount may be higher than advisable.',
+                                    'The user is never blocked — the warning is informational only.',
                                 ]
                             },
                             {
-                                id: 'rem-3',
-                                label: 'System recalculates after a new transaction syncs',
+                                id: 'alert-3',
+                                label: 'Spending rate suggests the budget will be exceeded',
                                 detail: [
-                                    { tag: 'event', text: 'transaction.created event → invalidate remaining cache' },
-                                    { tag: 'svc', text: 'Real-time or near-real-time via event-driven pipeline (webhook / polling)' },
-                                    { tag: 'logic', text: 'Open Banking / bank API integration feeds transaction stream' },
+                                    'The system projects whether the user is on track to exceed their budget before the period ends.',
+                                    'If the projection exceeds the budget, a pre-emptive alert is sent.',
+                                    'The alert includes the projected overspend and days remaining in the period.',
                                 ]
                             },
                         ]
                     },
-                    con: {
-                        label: 'Conflict & Divergence Alerts',
-                        description: 'Warns when user budget differs significantly from recommendation',
+                    notifications: {
+                        label: 'Budget Notifications',
+                        description: 'Informational progress updates to keep the user aware of their spending',
                         useCases: [
                             {
-                                id: 'con-1',
-                                label: 'User sets budget far below typical spend',
+                                id: 'notif-1',
+                                label: 'User has used a percentage of their budget',
                                 detail: [
-                                    { tag: 'logic', text: 'Divergence check: |userBudget − recommended| / recommended > 30%' },
-                                    { tag: 'api', text: 'Warning payload returned inline on POST/PUT /budgets' },
-                                    { tag: 'svc', text: 'UI nudge state — soft warning, not a hard block' },
+                                    'Notifications are sent when spending reaches key milestones (e.g. 50%, 75%, 90% of budget).',
+                                    'Each notification shows the amount spent, amount remaining, and days left in the period.',
+                                    'Milestone thresholds are configurable per user.',
                                 ]
                             },
                             {
-                                id: 'con-2',
-                                label: 'User ignores recommendation — system respects but logs',
+                                id: 'notif-2',
+                                label: 'Budget period is about to reset',
                                 detail: [
-                                    { tag: 'entity', text: 'DivergenceLog — userBudget, recommended, delta, timestamp' },
-                                    { tag: 'logic', text: 'UserBudget.overrideReason optional field for analytics' },
-                                    { tag: 'svc', text: 'Recommendation stays surfaced until dismissed explicitly' },
+                                    'A notification is sent before the budget period resets (e.g. 1 day before).',
+                                    'The notification summarises total spend for the ending period and remaining budget.',
+                                    'This helps the user reflect on their spending before a new period begins.',
                                 ]
                             },
                             {
-                                id: 'con-3',
-                                label: 'User asks why the budget is recommended',
+                                id: 'notif-3',
+                                label: 'Recommendation has changed',
                                 detail: [
-                                    { tag: 'logic', text: 'Explainability layer: "based on your last 3 months averaging £X"' },
-                                    { tag: 'api', text: 'GET /recommendations/:id/explanation — returns contributing transactions' },
-                                    { tag: 'svc', text: 'Optional: percentile context ("higher than 70% of similar users")' },
+                                    'When the system recalculates the recommendation and the new value differs significantly, the user is notified.',
+                                    'The notification shows the old and new recommendation with a brief explanation of what changed.',
+                                    'The user can review and optionally update their budget from the notification.',
+                                ]
+                            },
+                            {
+                                id: 'notif-4',
+                                label: 'Remaining budget updates after new gambling activity',
+                                detail: [
+                                    'When a new gambling transaction is recorded, the remaining budget is recalculated.',
+                                    'Updates happen in near real-time via event-driven processing.',
+                                    'Transaction data is sourced from operator integrations or Open Banking feeds.',
+                                ]
+                            },
+                        ]
+                    }
+                }
+            },
+            score: {
+                label: 'Score',
+                icon: 'bi-speedometer2',
+                description: 'A responsible gambling score that reflects the user\'s gambling behaviour and financial health over time.',
+                features: {
+                    calc: {
+                        label: 'Score Calculation',
+                        description: 'Computes the user\'s GamScore based on behavioural and financial signals',
+                        useCases: [
+                            {
+                                id: 'score-calc-1',
+                                label: 'System calculates the initial GamScore',
+                                detail: [
+                                    'On first use, the system analyses available gambling history and financial data to produce an initial score.',
+                                    'The score is presented on a clear scale (e.g. 0–100) with a traffic-light indicator.',
+                                    'If insufficient data is available, a provisional score is shown with an explanation of what is needed for a full assessment.',
+                                ]
+                            },
+                            {
+                                id: 'score-calc-2',
+                                label: 'Score updates after new activity',
+                                detail: [
+                                    'The score is recalculated when new gambling transactions or financial data are received.',
+                                    'Score changes are logged so the user can see how their score has moved over time.',
+                                    'Significant score drops trigger a notification to the user.',
+                                ]
+                            },
+                            {
+                                id: 'score-calc-3',
+                                label: 'User views score breakdown',
+                                detail: [
+                                    'The user can see which factors contributed to their score (e.g. frequency, spend vs. income, budget adherence).',
+                                    'Each factor shows its individual contribution and direction (positive or negative).',
+                                    'Actionable tips are provided alongside each factor to help the user improve.',
+                                ]
+                            },
+                        ]
+                    },
+                    history: {
+                        label: 'Score History',
+                        description: 'Tracks how the user\'s score has changed over time',
+                        useCases: [
+                            {
+                                id: 'score-hist-1',
+                                label: 'User views their score trend',
+                                detail: [
+                                    'A timeline chart shows the user\'s score over days, weeks, or months.',
+                                    'Key events (e.g. budget changes, large transactions) are annotated on the timeline.',
+                                    'The user can filter the view by time range.',
+                                ]
+                            },
+                            {
+                                id: 'score-hist-2',
+                                label: 'User compares score across periods',
+                                detail: [
+                                    'The user can compare their current score against a previous period (e.g. this month vs. last month).',
+                                    'The comparison highlights what changed and why.',
+                                    'Positive trends are reinforced with encouraging messaging.',
+                                ]
+                            },
+                        ]
+                    },
+                    benchmark: {
+                        label: 'Score Benchmarking',
+                        description: 'Allows the user to understand their score in context',
+                        useCases: [
+                            {
+                                id: 'score-bench-1',
+                                label: 'User sees how their score compares to similar users',
+                                detail: [
+                                    'An anonymised percentile ranking shows where the user sits relative to others in their demographic.',
+                                    'Comparisons are opt-in and privacy-preserving — no individual data is shared.',
+                                    'The benchmarking view includes context about what a "good" score range looks like.',
+                                ]
+                            },
+                            {
+                                id: 'score-bench-2',
+                                label: 'User sets a personal score goal',
+                                detail: [
+                                    'The user can set a target score they wish to reach.',
+                                    'Progress toward the goal is tracked and shown alongside the score.',
+                                    'Tips and suggested actions are tailored to help the user reach their goal.',
+                                ]
+                            },
+                        ]
+                    }
+                }
+            },
+            education: {
+                label: 'Education',
+                icon: 'bi-mortarboard',
+                description: 'Educational content and resources to help users understand responsible gambling and improve their habits.',
+                features: {
+                    content: {
+                        label: 'Educational Content',
+                        description: 'Curated articles, guides, and tips about responsible gambling',
+                        useCases: [
+                            {
+                                id: 'edu-content-1',
+                                label: 'User browses educational articles',
+                                detail: [
+                                    'A library of articles is available covering topics like odds, budgeting, and recognising harmful patterns.',
+                                    'Content is categorised by topic and difficulty level.',
+                                    'The user can bookmark articles for later reading.',
+                                ]
+                            },
+                            {
+                                id: 'edu-content-2',
+                                label: 'System recommends relevant content',
+                                detail: [
+                                    'Based on the user\'s score, behaviour, and activity, the system suggests relevant educational content.',
+                                    'For example, a user who frequently exceeds their budget may see articles about spending control strategies.',
+                                    'Recommendations are refreshed as the user\'s situation changes.',
+                                ]
+                            },
+                            {
+                                id: 'edu-content-3',
+                                label: 'User completes an educational module',
+                                detail: [
+                                    'Interactive modules with quizzes help reinforce key concepts.',
+                                    'Completion is tracked and can contribute positively to the user\'s score.',
+                                    'Certificates or badges are awarded for completing modules.',
+                                ]
+                            },
+                        ]
+                    },
+                    glossary: {
+                        label: 'Glossary & FAQ',
+                        description: 'Definitions and answers to common questions about gambling and financial terms',
+                        useCases: [
+                            {
+                                id: 'edu-gloss-1',
+                                label: 'User looks up a gambling term',
+                                detail: [
+                                    'A searchable glossary provides plain-language definitions for gambling and financial terms.',
+                                    'Terms are cross-linked so the user can explore related concepts.',
+                                    'Contextual tooltips surface glossary definitions inline within the app.',
+                                ]
+                            },
+                            {
+                                id: 'edu-gloss-2',
+                                label: 'User reads frequently asked questions',
+                                detail: [
+                                    'A curated FAQ section addresses common questions about GamScore, budgets, and responsible gambling.',
+                                    'Questions are grouped by topic for easy browsing.',
+                                    'Users can submit new questions which are reviewed and added over time.',
+                                ]
+                            },
+                        ]
+                    },
+                    support: {
+                        label: 'Support Resources',
+                        description: 'Links to external support services and helplines',
+                        useCases: [
+                            {
+                                id: 'edu-support-1',
+                                label: 'User accesses support helplines',
+                                detail: [
+                                    'A dedicated page lists relevant support organisations (e.g. GamCare, BeGambleAware).',
+                                    'Contact details include phone, chat, and web links.',
+                                    'Support resources are always accessible regardless of the user\'s score or status.',
+                                ]
+                            },
+                            {
+                                id: 'edu-support-2',
+                                label: 'System proactively suggests support',
+                                detail: [
+                                    'If the user\'s score drops below a critical threshold, support resources are surfaced proactively.',
+                                    'The suggestion is non-intrusive and respects the user\'s autonomy.',
+                                    'The user can dismiss or snooze the suggestion.',
+                                ]
+                            },
+                        ]
+                    }
+                }
+            },
+            report: {
+                label: 'Report',
+                icon: 'bi-bar-chart-line',
+                description: 'Detailed reports and analytics on the user\'s gambling activity, spending patterns, and score progression.',
+                features: {
+                    summary: {
+                        label: 'Activity Summary',
+                        description: 'High-level overview of gambling activity for a chosen period',
+                        useCases: [
+                            {
+                                id: 'rpt-sum-1',
+                                label: 'User views a weekly or monthly activity summary',
+                                detail: [
+                                    'The summary shows total spend, number of transactions, and net position for the selected period.',
+                                    'Key metrics are compared against the previous period to show trends.',
+                                    'The summary is available on-demand and can also be sent as a scheduled notification.',
+                                ]
+                            },
+                            {
+                                id: 'rpt-sum-2',
+                                label: 'User views spending by operator or category',
+                                detail: [
+                                    'Spending is broken down by gambling operator, type (e.g. sports, casino, lottery), or payment method.',
+                                    'Visualisations such as pie charts or bar charts make the data easy to interpret.',
+                                    'The user can drill down into individual categories to see transaction-level detail.',
+                                ]
+                            },
+                        ]
+                    },
+                    trends: {
+                        label: 'Trend Analysis',
+                        description: 'Visualises patterns and trends in gambling behaviour over time',
+                        useCases: [
+                            {
+                                id: 'rpt-trend-1',
+                                label: 'User views spending trends over time',
+                                detail: [
+                                    'Line and bar charts show how gambling spend has changed over weeks or months.',
+                                    'Trend lines highlight whether spending is increasing, stable, or decreasing.',
+                                    'Annotations mark significant events such as budget changes or large wins/losses.',
+                                ]
+                            },
+                            {
+                                id: 'rpt-trend-2',
+                                label: 'User identifies peak gambling periods',
+                                detail: [
+                                    'Heatmaps or calendar views show which days or times of day the user gambles most.',
+                                    'Patterns are highlighted (e.g. "You tend to gamble more on weekends").',
+                                    'Insights are paired with suggestions for managing those peak periods.',
+                                ]
+                            },
+                        ]
+                    },
+                    export: {
+                        label: 'Report Export',
+                        description: 'Allows the user to download or share their reports',
+                        useCases: [
+                            {
+                                id: 'rpt-export-1',
+                                label: 'User downloads a report as PDF',
+                                detail: [
+                                    'The user can generate a formatted PDF of any report view.',
+                                    'The PDF includes charts, tables, and a summary narrative.',
+                                    'Reports are date-stamped and include the user\'s score at the time of generation.',
+                                ]
+                            },
+                            {
+                                id: 'rpt-export-2',
+                                label: 'User exports raw data as CSV',
+                                detail: [
+                                    'Transaction-level data can be exported as a CSV for personal record-keeping.',
+                                    'The export includes all relevant fields: date, amount, operator, category, and type.',
+                                    'Data is filtered to the selected report period before export.',
+                                ]
+                            },
+                        ]
+                    }
+                }
+            },
+            user: {
+                label: 'User',
+                icon: 'bi-person-circle',
+                description: 'User account management, preferences, authentication, and profile settings.',
+                features: {
+                    profile: {
+                        label: 'Profile Management',
+                        description: 'User can view and update their personal details and preferences',
+                        useCases: [
+                            {
+                                id: 'user-prof-1',
+                                label: 'User creates an account',
+                                detail: [
+                                    'The user registers with an email address and password, or via social login.',
+                                    'Basic profile information (name, date of birth) is collected during onboarding.',
+                                    'Age verification is performed to ensure the user meets the minimum age requirement.',
+                                ]
+                            },
+                            {
+                                id: 'user-prof-2',
+                                label: 'User updates their profile',
+                                detail: [
+                                    'The user can update their name, email, notification preferences, and other settings.',
+                                    'Changes to email require verification via a confirmation link.',
+                                    'Profile updates are logged for audit purposes.',
+                                ]
+                            },
+                            {
+                                id: 'user-prof-3',
+                                label: 'User deletes their account',
+                                detail: [
+                                    'The user can request account deletion, which triggers a confirmation flow.',
+                                    'A grace period (e.g. 30 days) allows the user to change their mind before data is permanently removed.',
+                                    'Data retention policies are followed for any legally required records.',
+                                ]
+                            },
+                        ]
+                    },
+                    auth: {
+                        label: 'Authentication & Security',
+                        description: 'Login, logout, password management, and multi-factor authentication',
+                        useCases: [
+                            {
+                                id: 'user-auth-1',
+                                label: 'User logs in',
+                                detail: [
+                                    'The user authenticates with email/password or a social login provider.',
+                                    'Multi-factor authentication (MFA) can be enabled for added security.',
+                                    'Failed login attempts are rate-limited and logged.',
+                                ]
+                            },
+                            {
+                                id: 'user-auth-2',
+                                label: 'User resets their password',
+                                detail: [
+                                    'The user requests a password reset via their registered email.',
+                                    'A time-limited reset link is sent to their inbox.',
+                                    'After resetting, all existing sessions are invalidated for security.',
+                                ]
+                            },
+                            {
+                                id: 'user-auth-3',
+                                label: 'User enables multi-factor authentication',
+                                detail: [
+                                    'The user can enable MFA using an authenticator app or SMS.',
+                                    'Backup codes are provided in case the primary MFA method is unavailable.',
+                                    'MFA settings can be managed from the security section of the profile.',
+                                ]
+                            },
+                        ]
+                    },
+                    prefs: {
+                        label: 'Notification Preferences',
+                        description: 'Controls how and when the user receives notifications',
+                        useCases: [
+                            {
+                                id: 'user-prefs-1',
+                                label: 'User configures notification channels',
+                                detail: [
+                                    'The user can choose to receive notifications via push, email, or SMS.',
+                                    'Each notification type (budget alerts, score changes, reports) can be configured independently.',
+                                    'The user can set quiet hours during which non-critical notifications are suppressed.',
+                                ]
+                            },
+                            {
+                                id: 'user-prefs-2',
+                                label: 'User opts out of specific notifications',
+                                detail: [
+                                    'Individual notification types can be disabled without affecting others.',
+                                    'Critical safety notifications (e.g. support resources) cannot be fully disabled but can be reduced in frequency.',
+                                    'Preferences are synced across all devices.',
+                                ]
+                            },
+                        ]
+                    }
+                }
+            },
+            financialdata: {
+                label: 'Financial Data',
+                icon: 'bi-bank',
+                description: 'Integration with financial data sources to provide a complete picture of the user\'s gambling-related transactions.',
+                features: {
+                    connect: {
+                        label: 'Account Connection',
+                        description: 'Link bank accounts and payment methods via Open Banking or manual entry',
+                        useCases: [
+                            {
+                                id: 'fin-conn-1',
+                                label: 'User connects a bank account via Open Banking',
+                                detail: [
+                                    'The user initiates a connection through a secure Open Banking flow.',
+                                    'Consent is obtained and the user is redirected to their bank for authorisation.',
+                                    'Once connected, transaction data is fetched automatically on a recurring schedule.',
+                                ]
+                            },
+                            {
+                                id: 'fin-conn-2',
+                                label: 'User manages connected accounts',
+                                detail: [
+                                    'The user can view all connected accounts and their connection status.',
+                                    'Connections can be refreshed, re-authorised, or disconnected at any time.',
+                                    'If a connection expires or fails, the user is notified and guided through re-authorisation.',
+                                ]
+                            },
+                            {
+                                id: 'fin-conn-3',
+                                label: 'User adds a transaction manually',
+                                detail: [
+                                    'For transactions not captured via Open Banking, the user can add entries manually.',
+                                    'Manual entries include date, amount, operator, and category.',
+                                    'Manual entries are flagged separately from automated data for transparency.',
+                                ]
+                            },
+                        ]
+                    },
+                    classify: {
+                        label: 'Transaction Classification',
+                        description: 'Automatically identifies and categorises gambling transactions',
+                        useCases: [
+                            {
+                                id: 'fin-class-1',
+                                label: 'System classifies incoming transactions',
+                                detail: [
+                                    'Incoming bank transactions are analysed to identify those related to gambling.',
+                                    'Classification uses merchant codes, transaction descriptions, and known operator names.',
+                                    'Transactions are categorised by type (e.g. deposit, withdrawal, bonus).',
+                                ]
+                            },
+                            {
+                                id: 'fin-class-2',
+                                label: 'User corrects a misclassified transaction',
+                                detail: [
+                                    'The user can flag a transaction as incorrectly classified.',
+                                    'Corrections are saved and used to improve future classification accuracy.',
+                                    'The user can re-categorise transactions manually if needed.',
+                                ]
+                            },
+                        ]
+                    },
+                    income: {
+                        label: 'Income & Affordability',
+                        description: 'Understands the user\'s income to assess gambling affordability',
+                        useCases: [
+                            {
+                                id: 'fin-income-1',
+                                label: 'System detects income from transaction data',
+                                detail: [
+                                    'Regular income (e.g. salary) is identified from bank transaction patterns.',
+                                    'The detected income is used to assess whether gambling spend is proportionate.',
+                                    'The user can confirm or adjust the detected income figure.',
+                                ]
+                            },
+                            {
+                                id: 'fin-income-2',
+                                label: 'User views affordability assessment',
+                                detail: [
+                                    'An affordability view shows gambling spend as a percentage of income.',
+                                    'Thresholds indicate whether spend is within a healthy range.',
+                                    'The assessment is factored into the user\'s overall GamScore.',
+                                ]
+                            },
+                            {
+                                id: 'fin-income-3',
+                                label: 'User sets income manually',
+                                detail: [
+                                    'If income cannot be detected automatically, the user can enter it manually.',
+                                    'Manual income entries are used in the same way as detected income for affordability calculations.',
+                                    'The user is reminded to update their income if it has not changed in a long time.',
                                 ]
                             },
                         ]
@@ -638,9 +1138,6 @@
                 }
             }
         };
-
-        // Tag display labels
-        const tagLabels = { entity: 'Entity', api: 'API', logic: 'Logic', event: 'Event', svc: 'Service' };
 
         // ── State ────────────────────────────────────────
         let currentDomain = null;
@@ -742,27 +1239,18 @@
             const uc = feature.useCases.find(u => u.id === ucId);
             const area = document.getElementById('detail-area');
 
-            // Build detail HTML
-            const techHtml = uc.detail.map(item => `
-            <div class="tech-item">
-                <span class="tech-tag tag-${item.tag}">${tagLabels[item.tag]}</span>
-                <span class="tech-desc">${item.text}</span>
+            // Build detail HTML from plain text descriptions
+            const detailHtml = uc.detail.map(text => `
+            <div class="detail-item">
+                <i class="bi bi-dot"></i>
+                <span>${text}</span>
             </div>
         `).join('');
 
             area.innerHTML = `
             <div class="detail-section">
-                <div class="detail-section-title">Use Case</div>
-                <div class="uc-context">
-                    <strong>${uc.label}</strong><br/>
-                    This use case sits within <strong>${feature.label}</strong> in the <strong>${domains[domainKey].label}</strong> domain.
-                    It captures the <em>actor</em> (user or system), the <em>trigger</em>, and the <em>expected outcome</em> —
-                    forming the contract between product and engineering.
-                </div>
-            </div>
-            <div class="detail-section">
-                <div class="detail-section-title">Technical Details</div>
-                ${techHtml}
+                <div class="detail-section-title">${uc.label}</div>
+                ${detailHtml}
             </div>
         `;
         }
