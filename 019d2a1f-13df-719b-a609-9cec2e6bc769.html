@@ -442,6 +442,43 @@
             color: var(--gs-dark-blue);
             font-size: 16px;
         }
+
+        /* ── To Do Section ──────────────────────────────── */
+        .todo-section {
+            border-top: 2px solid var(--gs-border);
+            background: var(--gs-card-bg);
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 14px;
+            margin-bottom: 6px;
+            border: 1.5px solid var(--gs-border);
+            border-radius: 10px;
+            background: var(--gs-body-bg);
+            font-size: 13px;
+        }
+
+        .todo-item .todo-path {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gs-text);
+        }
+
+        .todo-item .todo-text {
+            font-size: 12px;
+            color: var(--gs-text-secondary);
+            margin-top: 2px;
+        }
+
+        .todo-item i {
+            color: var(--gs-warning);
+            font-size: 16px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
     </style>
 </head>
 
@@ -528,6 +565,14 @@
         </div>
     </div>
 
+    <!-- ── To Do ──────────────────────────────────── -->
+    <div class="todo-section" id="todo-section" style="display:none;">
+        <div class="container-fluid" style="padding: 1.25rem 1.5rem;">
+            <div class="page-title"><i class="bi bi-check2-square me-2" style="color:var(--gs-light-blue)"></i>To Do</div>
+            <div id="todo-list"></div>
+        </div>
+    </div>
+
     <!-- ── Footer ─────────────────────────────────── -->
     <footer class="gs-footer">
         &copy; 2026 — GamScore Product Feature Explorer
@@ -541,153 +586,6 @@
         // each use case has detail descriptions.
         // ══════════════════════════════════════════════════
         const domains = {
-            budget: {
-                label: 'Budget',
-                icon: 'bi-wallet2',
-                description: 'Responsibly managing your budget, with help from our recommendation. Receiving notifications on your progress.',
-                features: {
-                    set: {
-                        label: 'Budget Setting',
-                        description: 'User sets a single overall gambling spending budget for a chosen period',
-                        useCases: [
-                            {
-                                id: 'set-1',
-                                label: 'User creates their gambling budget',
-                                detail: [
-                                    'The user sets a total spending limit for a chosen period (e.g. weekly, monthly).',
-                                    'The system validates the amount is positive and that a budget does not already exist for that period.',
-                                    'Once saved, the budget becomes the single reference point for all tracking and alerts.',
-                                ]
-                            },
-                            {
-                                id: 'set-2',
-                                label: 'User edits their gambling budget',
-                                detail: [
-                                    'The user can update the amount or period of their existing budget.',
-                                    'Changing the budget triggers an immediate recalculation of remaining spend.',
-                                    'If the new amount differs significantly from the recommendation, a soft warning is shown.',
-                                ]
-                            },
-                        ]
-                    },
-                    rec: {
-                        label: 'Budget Recommendation',
-                        description: 'Suggests a responsible budget based on the user\'s gambling history',
-                        useCases: [
-                            {
-                                id: 'rec-1',
-                                label: 'System generates a recommendation on first login',
-                                detail: [
-                                    'The system analyses the user\'s recent gambling transaction history.',
-                                    'A recommended budget is calculated based on average or median spend over a rolling period.',
-                                    'The recommendation is presented with a confidence indicator so the user understands its basis.',
-                                ]
-                            },
-                            {
-                                id: 'rec-2',
-                                label: 'Recommendation refreshes after new activity',
-                                detail: [
-                                    'When new gambling transactions are recorded, the recommendation is recalculated.',
-                                    'The user can also manually request a recommendation refresh at any time.',
-                                ]
-                            },
-                            {
-                                id: 'rec-3',
-                                label: 'User accepts or dismisses the recommendation',
-                                detail: [
-                                    'The user can accept the recommendation, which pre-fills their budget with the suggested amount.',
-                                    'Alternatively, the user can dismiss it and set their own amount.',
-                                    'Dismissed recommendations can be revisited later from the budget settings.',
-                                ]
-                            },
-                            {
-                                id: 'rec-4',
-                                label: 'User asks why a budget was recommended',
-                                detail: [
-                                    'The system explains the recommendation, e.g. "Based on your last 3 months, averaging £X per month."',
-                                    'Contributing transactions can be shown for full transparency.',
-                                    'Optionally, context such as comparison to similar users may be provided.',
-                                ]
-                            },
-                        ]
-                    },
-                    alerts: {
-                        label: 'Budget Alerts',
-                        description: 'Actionable warnings when something needs the user\'s attention',
-                        useCases: [
-                            {
-                                id: 'alert-1',
-                                label: 'User has exceeded their budget',
-                                detail: [
-                                    'When spending surpasses 100% of the budget, an alert is triggered immediately.',
-                                    'The alert shows the overspend amount and suggests reviewing recent activity.',
-                                    'The user can acknowledge the alert or adjust their budget in response.',
-                                ]
-                            },
-                            {
-                                id: 'alert-2',
-                                label: 'Budget is set significantly above the recommendation',
-                                detail: [
-                                    'When the user sets a budget that exceeds the recommendation by a notable margin, a warning is displayed.',
-                                    'The warning explains the recommendation basis and why the chosen amount may be higher than advisable.',
-                                    'The user is never blocked — the warning is informational only.',
-                                ]
-                            },
-                            {
-                                id: 'alert-3',
-                                label: 'Spending rate suggests the budget will be exceeded',
-                                detail: [
-                                    'The system projects whether the user is on track to exceed their budget before the period ends.',
-                                    'If the projection exceeds the budget, a pre-emptive alert is sent.',
-                                    'The alert includes the projected overspend and days remaining in the period.',
-                                ]
-                            },
-                        ]
-                    },
-                    notifications: {
-                        label: 'Budget Notifications',
-                        description: 'Informational progress updates to keep the user aware of their spending',
-                        useCases: [
-                            {
-                                id: 'notif-1',
-                                label: 'User has used a percentage of their budget',
-                                detail: [
-                                    'Notifications are sent when spending reaches key milestones (e.g. 50%, 75%, 90% of budget).',
-                                    'Each notification shows the amount spent, amount remaining, and days left in the period.',
-                                    'Milestone thresholds are configurable per user.',
-                                ]
-                            },
-                            {
-                                id: 'notif-2',
-                                label: 'Budget period is about to reset',
-                                detail: [
-                                    'A notification is sent before the budget period resets (e.g. 1 day before).',
-                                    'The notification summarises total spend for the ending period and remaining budget.',
-                                    'This helps the user reflect on their spending before a new period begins.',
-                                ]
-                            },
-                            {
-                                id: 'notif-3',
-                                label: 'Recommendation has changed',
-                                detail: [
-                                    'When the system recalculates the recommendation and the new value differs significantly, the user is notified.',
-                                    'The notification shows the old and new recommendation with a brief explanation of what changed.',
-                                    'The user can review and optionally update their budget from the notification.',
-                                ]
-                            },
-                            {
-                                id: 'notif-4',
-                                label: 'Remaining budget updates after new gambling activity',
-                                detail: [
-                                    'When a new gambling transaction is recorded, the remaining budget is recalculated.',
-                                    'Updates happen in near real-time via event-driven processing.',
-                                    'Transaction data is sourced from operator integrations or Open Banking feeds.',
-                                ]
-                            },
-                        ]
-                    }
-                }
-            },
             score: {
                 label: 'Score',
                 icon: 'bi-speedometer2',
@@ -701,27 +599,56 @@
                                 id: 'score-calc-1',
                                 label: 'System calculates the initial GamScore',
                                 detail: [
-                                    'On first use, the system analyses available gambling history and financial data to produce an initial score.',
-                                    'The score is presented on a clear scale (e.g. 0–100) with a traffic-light indicator.',
-                                    'If insufficient data is available, a provisional score is shown with an explanation of what is needed for a full assessment.',
+                                    'When the user first links their bank account, the system analyses available gambling history and financial data to produce an initial score.',
+                                    'The score is presented on a clear 0-1000 scale with a traffic-light indicator.',
+                                    'If insufficient data is available, The user is notified that a score cannot be generated yet and what data is required.',
+                                    'TODO: Score algorithm to be provided by Ian.',
                                 ]
                             },
                             {
                                 id: 'score-calc-2',
-                                label: 'Score updates after new activity',
+                                label: 'System updates score after new activity',
                                 detail: [
                                     'The score is recalculated when new gambling transactions or financial data are received.',
-                                    'Score changes are logged so the user can see how their score has moved over time.',
-                                    'Significant score drops trigger a notification to the user.',
+                                    'The score is presented on a clear 0-1000 scale with a traffic-light indicator.',
+                                    'If insufficient data is available, The user is notified that a score cannot be generated yet and what data is required.',
+                                    'TODO: Score algorithm to be provided by Ian.',
                                 ]
                             },
                             {
                                 id: 'score-calc-3',
-                                label: 'User views score breakdown',
+                                label: 'User views score',
                                 detail: [
-                                    'The user can see which factors contributed to their score (e.g. frequency, spend vs. income, budget adherence).',
-                                    'Each factor shows its individual contribution and direction (positive or negative).',
-                                    'Actionable tips are provided alongside each factor to help the user improve.',
+                                    'The user can see the current score',
+                                    'The user can see the trend in their score this week and this month',
+                                ]
+                            },
+                            {
+                                id: 'score-calc-4',
+                                label: 'User views what they are doing well',
+                                detail: [
+                                    'The system highlights positive behaviours that are contributing to the user\'s score (e.g. staying within budget, gambling less frequently).',
+                                    'Each positive factor is shown with its impact on the overall score.',
+                                    'Positive reinforcement encourages the user to maintain good habits.',
+                                ]
+                            },
+                            {
+                                id: 'score-calc-5',
+                                label: 'User views areas to improve',
+                                detail: [
+                                    'The system identifies behaviours that are negatively affecting the score (e.g. exceeding budget, increasing frequency).',
+                                    'Each area for improvement includes a specific, actionable suggestion.',
+                                    'Suggestions are prioritised by potential impact on the score.',
+                                ]
+                            },
+                            {
+                                id: 'score-calc-6',
+                                label: 'User views score factor breakdown',
+                                detail: [
+                                    'A breakdown shows all contributing factors and their individual weighting (e.g. spend vs. income, frequency, budget adherence).',
+                                    'Each factor shows whether it is currently helping or hurting the score.',
+                                    'The user can tap a factor to see more detail and related trends.',
+                                    'TODO: Do we want this? Is this too much detail?'
                                 ]
                             },
                         ]
@@ -735,7 +662,6 @@
                                 label: 'User views their score trend',
                                 detail: [
                                     'A timeline chart shows the user\'s score over days, weeks, or months.',
-                                    'Key events (e.g. budget changes, large transactions) are annotated on the timeline.',
                                     'The user can filter the view by time range.',
                                 ]
                             },
@@ -745,7 +671,7 @@
                                 detail: [
                                     'The user can compare their current score against a previous period (e.g. this month vs. last month).',
                                     'The comparison highlights what changed and why.',
-                                    'Positive trends are reinforced with encouraging messaging.',
+                                    'TODO: Do we want this? If so, what else do we want to show?',
                                 ]
                             },
                         ]
@@ -758,9 +684,8 @@
                                 id: 'score-bench-1',
                                 label: 'User sees how their score compares to similar users',
                                 detail: [
-                                    'An anonymised percentile ranking shows where the user sits relative to others in their demographic.',
-                                    'Comparisons are opt-in and privacy-preserving — no individual data is shared.',
-                                    'The benchmarking view includes context about what a "good" score range looks like.',
+                                    'Comparison to people in a similar demographic e.g. age, gender, location, income.',
+                                    'TODO: Do we want this? If so, what comparisons do we want to show?',
                                 ]
                             },
                             {
@@ -769,7 +694,274 @@
                                 detail: [
                                     'The user can set a target score they wish to reach.',
                                     'Progress toward the goal is tracked and shown alongside the score.',
-                                    'Tips and suggested actions are tailored to help the user reach their goal.',
+                                    'TODO: Do we want this?',
+                                ]
+                            },
+                        ]
+                    },
+                    scorenotif: {
+                        label: 'Score Notifications',
+                        description: 'Keeps the user informed about meaningful changes to their score',
+                        useCases: [
+                            {
+                                id: 'score-notif-1',
+                                label: 'User is notified when their score changes significantly',
+                                detail: [
+                                    'A notification is sent when the score moves by more than 10 points.',
+                                    'TODO: Content required for notification.',
+                                ]
+                            },
+                            {
+                                id: 'score-notif-2',
+                                label: 'User is notified when their score drops below a critical level',
+                                detail: [
+                                    'If the score falls below a critical threshold (TBC), an alert is sent with links to support resources.',
+                                    'TODO: Define critical threshold.',
+                                    'TODO: Define content for alert. Links to support resources? etc.',
+                                ]
+                            },
+                            {
+                                id: 'score-notif-3',
+                                label: 'User is congratulated when their score improves',
+                                detail: [
+                                    'Positive score movements trigger an encouraging notification.',
+                                    'TODO: Define positive',
+                                    'TODO: Define content for notification.'
+                                ]
+                            },
+                        ]
+                    },
+                }
+            },
+            budget: {
+                label: 'Budget',
+                icon: 'bi-wallet2',
+                description: 'Responsibly managing your budget, with help from our recommendation. Receiving notifications on your progress.',
+                features: {
+                    set: {
+                        label: 'Budget Setting',
+                        description: 'User sets a single overall gambling spending budget for a chosen period',
+                        useCases: [
+                            {
+                                id: 'set-1',
+                                label: 'User creates their gambling budget',
+                                detail: [
+                                    'The user sets a budget amount for a chosen period (daily, weekly, monthly).',
+                                    'The user sets a reset time based on their chosen period (e.g. no choice for daily, day of week for weekly, day of month for monthly).',
+                                    'The reset time will always be at 00:00 in the user\'s local time.',
+                                    'The system validates the amount is positive.',
+                                    'If the amount is lower than the recommended amount, the system will show a positive indication.',
+                                    'If the amount is higher than the recommended amount, the system will show a hard warning asking the user if they are sure they want to set this budget.',
+                                    'If the user will immediately be over budget, the system will show a soft warning ',
+                                    'If the user will be near (95% or over) their budget, the system will show a notification.',
+                                    'Once saved, the budget becomes the single reference point for all tracking and alerts.',
+                                ]
+                            },
+                            {
+                                id: 'set-2',
+                                label: 'User edits their gambling budget',
+                                detail: [
+                                    'The user can update the amount, period, or reset time of their existing budget.',
+                                    'Changing the budget triggers an immediate recalculation of remaining spend.',
+                                    'The system validates the amount is positive.',
+                                    'If the amount is lower than the recommended amount, the system will show a positive indication.',
+                                    'If the amount is higher than the recommended amount, the system will show a hard warning asking the user if they are sure they want to set this budget.',
+                                    'If the user will immediately be over budget, the system will show a soft warning ',
+                                    'If the user will be near (95% or over) their budget, the system will show a notification.',
+                                    'Once saved, the budget becomes the single reference point for all tracking and alerts.',
+                                ]
+                            },
+                            {
+                                id: 'set-3',
+                                label: 'User views their historic budgets',
+                                detail: [
+                                    'The user can view a list of all previous budgets they have set, including amount, period, and the dates they were active.',
+                                    'Each historic budget shows a summary of actual spend against the budgeted amount for that period.',
+                                    'Historic budgets are read-only and retained for reporting and trend analysis.',
+                                ]
+                            },
+                        ]
+                    },
+                    rec: {
+                        label: 'Budget Recommendation',
+                        description: 'Suggests a responsible budget based on the user\'s gambling history',
+                        useCases: [
+                            {
+                                id: 'rec-1',
+                                label: 'System generates a recommendation when enough data is available',
+                                detail: [
+                                    'The system analyses the user\'s recent transaction history.',
+                                    'A recommended budget is calculated based on 12% of the average available discretionary spend over the last 3 complete months.',
+                                    'If insufficient data is available (missing bank account, less than 3 full months etc.) to calculate a recommendation, the system will show a message indicating this.',
+                                    'The recommendation is rounded down to the nearest whole pound.'
+                                ]
+                            },
+                            {
+                                id: 'rec-2',
+                                label: 'System refreshes recommendation when new data is available',
+                                detail: [
+                                    'The system analyses the user\'s recent transaction history.',
+                                    'A recommended budget is calculated based on 12% of the average available discretionary spend over the last 3 complete months.',
+                                    'If insufficient data is available (missing bank account, less than 3 full months etc.) to calculate a recommendation, the system will show a message indicating this.',
+                                    'The recommendation is rounded down to the nearest whole pound.'
+                                ]
+                            },
+                            {
+                                id: 'rec-3',
+                                label: 'User sets their budget based on recommendation',
+                                detail: [
+                                    'The user can accept a percentage (25%, 50%, 75%, 100%) of the recommendation, which pre-fills their budget with the suggested amount.',
+                                ]
+                            },
+                            {
+                                id: 'rec-4',
+                                label: 'User asks why a budget was recommended',
+                                detail: [
+                                    'TODO: Do we want this?',
+                                ]
+                            },
+                        ]
+                    },
+                    alerts: {
+                        label: 'Budget Alerts',
+                        description: 'Actionable warnings when something needs the user\'s attention',
+                        useCases: [
+                            {
+                                id: 'alert-1',
+                                label: 'System detects user has exceeded their budget',
+                                detail: [
+                                    'When spending surpasses 100% of the budget, an alert is sent.',
+                                    'TODO: Content required for alert.',
+                                ]
+                            },
+                            {
+                                id: 'alert-2',
+                                label: 'System detects budget is set significantly above the recommendation',
+                                detail: [
+                                    'When the user sets a budget that exceeds the recommendation by 5%, an alert is sent',
+                                    'TODO: Content required for alert.',
+                                ]
+                            },
+                        ]
+                    },
+                    notifications: {
+                        label: 'Budget Notifications',
+                        description: 'Informational progress updates to keep the user aware of their spending',
+                        useCases: [
+                            {
+                                id: 'notif-1',
+                                label: 'User has used a percentage of their budget',
+                                detail: [
+                                    'Notifications are sent when spending reaches key milestones (e.g. 50%, 75%, 90% of budget).',
+                                    'TODO: Should milestone thresholds be configurable per user or fixed?',
+                                    'The user can disable this notification.',
+                                    'TODO: Content required for notification.',
+                                ]
+                            },
+                            {
+                                id: 'notif-2',
+                                label: 'System prepares to reset budget period',
+                                detail: [
+                                    'A notification is sent 1 day before the budget period resets.',
+                                    'The user can disable this notification.',
+                                    'TODO: Do we want this? If so, content required for notificationas well as time of day to send it.',
+                                ]
+                            },
+                            {
+                                id: 'notif-3',
+                                label: 'System resets budget period',
+                                detail: [
+                                    'A notification is sent after the budget period resets',
+                                    'The user can disable this notification.',
+                                    'TODO: Do we want this? If so, content required for notification as well as time of day send it.',
+                                ]
+                            },
+                            {
+                                id: 'notif-4',
+                                label: 'System recalculates recommendation',
+                                detail: [
+                                    'When the system recalculates the recommendation and the new value differs by more than 5%, the user is notified.',
+                                    'The user can review and optionally update their budget from the notification.',
+                                    'TODO: Content required for notification.',
+                                ]
+                            },
+                        ]
+                    }
+                }
+            },
+            report: {
+                label: 'Report',
+                icon: 'bi-bar-chart-line',
+                description: 'Detailed reports and analytics on the user\'s gambling activity, spending patterns, and score progression.',
+                features: {
+                    summary: {
+                        label: 'Activity Summary',
+                        description: 'High-level overview of gambling activity for a chosen period',
+                        useCases: [
+                            {
+                                id: 'rpt-sum-1',
+                                label: 'User views a weekly or monthly activity summary',
+                                detail: [
+                                    'The summary shows total spend, number of transactions, and net position for the selected period.',
+                                    'Key metrics are compared against the previous period to show trends.',
+                                    'The summary is available on-demand and can also be sent as a scheduled notification.',
+                                ]
+                            },
+                            {
+                                id: 'rpt-sum-2',
+                                label: 'User views spending by operator or category',
+                                detail: [
+                                    'Spending is broken down by gambling operator, type (e.g. sports, casino, lottery), or payment method.',
+                                    'Visualisations such as pie charts or bar charts make the data easy to interpret.',
+                                    'The user can drill down into individual categories to see transaction-level detail.',
+                                ]
+                            },
+                        ]
+                    },
+                    trends: {
+                        label: 'Trend Analysis',
+                        description: 'Visualises patterns and trends in gambling behaviour over time',
+                        useCases: [
+                            {
+                                id: 'rpt-trend-1',
+                                label: 'User views spending trends over time',
+                                detail: [
+                                    'Line and bar charts show how gambling spend has changed over weeks or months.',
+                                    'Trend lines highlight whether spending is increasing, stable, or decreasing.',
+                                    'Annotations mark significant events such as budget changes or large wins/losses.',
+                                ]
+                            },
+                            {
+                                id: 'rpt-trend-2',
+                                label: 'User identifies peak gambling periods',
+                                detail: [
+                                    'Heatmaps or calendar views show which days or times of day the user gambles most.',
+                                    'Patterns are highlighted (e.g. "You tend to gamble more on weekends").',
+                                    'Insights are paired with suggestions for managing those peak periods.',
+                                ]
+                            },
+                        ]
+                    },
+                    export: {
+                        label: 'Report Export',
+                        description: 'Allows the user to download or share their reports',
+                        useCases: [
+                            {
+                                id: 'rpt-export-1',
+                                label: 'User downloads a report as PDF',
+                                detail: [
+                                    'The user can generate a formatted PDF of any report view.',
+                                    'The PDF includes charts, tables, and a summary narrative.',
+                                    'Reports are date-stamped and include the user\'s score at the time of generation.',
+                                ]
+                            },
+                            {
+                                id: 'rpt-export-2',
+                                label: 'User exports raw data as CSV',
+                                detail: [
+                                    'Transaction-level data can be exported as a CSV for personal record-keeping.',
+                                    'The export includes all relevant fields: date, amount, operator, category, and type.',
+                                    'Data is filtered to the selected report period before export.',
                                 ]
                             },
                         ]
@@ -858,182 +1050,6 @@
                                     'If the user\'s score drops below a critical threshold, support resources are surfaced proactively.',
                                     'The suggestion is non-intrusive and respects the user\'s autonomy.',
                                     'The user can dismiss or snooze the suggestion.',
-                                ]
-                            },
-                        ]
-                    }
-                }
-            },
-            report: {
-                label: 'Report',
-                icon: 'bi-bar-chart-line',
-                description: 'Detailed reports and analytics on the user\'s gambling activity, spending patterns, and score progression.',
-                features: {
-                    summary: {
-                        label: 'Activity Summary',
-                        description: 'High-level overview of gambling activity for a chosen period',
-                        useCases: [
-                            {
-                                id: 'rpt-sum-1',
-                                label: 'User views a weekly or monthly activity summary',
-                                detail: [
-                                    'The summary shows total spend, number of transactions, and net position for the selected period.',
-                                    'Key metrics are compared against the previous period to show trends.',
-                                    'The summary is available on-demand and can also be sent as a scheduled notification.',
-                                ]
-                            },
-                            {
-                                id: 'rpt-sum-2',
-                                label: 'User views spending by operator or category',
-                                detail: [
-                                    'Spending is broken down by gambling operator, type (e.g. sports, casino, lottery), or payment method.',
-                                    'Visualisations such as pie charts or bar charts make the data easy to interpret.',
-                                    'The user can drill down into individual categories to see transaction-level detail.',
-                                ]
-                            },
-                        ]
-                    },
-                    trends: {
-                        label: 'Trend Analysis',
-                        description: 'Visualises patterns and trends in gambling behaviour over time',
-                        useCases: [
-                            {
-                                id: 'rpt-trend-1',
-                                label: 'User views spending trends over time',
-                                detail: [
-                                    'Line and bar charts show how gambling spend has changed over weeks or months.',
-                                    'Trend lines highlight whether spending is increasing, stable, or decreasing.',
-                                    'Annotations mark significant events such as budget changes or large wins/losses.',
-                                ]
-                            },
-                            {
-                                id: 'rpt-trend-2',
-                                label: 'User identifies peak gambling periods',
-                                detail: [
-                                    'Heatmaps or calendar views show which days or times of day the user gambles most.',
-                                    'Patterns are highlighted (e.g. "You tend to gamble more on weekends").',
-                                    'Insights are paired with suggestions for managing those peak periods.',
-                                ]
-                            },
-                        ]
-                    },
-                    export: {
-                        label: 'Report Export',
-                        description: 'Allows the user to download or share their reports',
-                        useCases: [
-                            {
-                                id: 'rpt-export-1',
-                                label: 'User downloads a report as PDF',
-                                detail: [
-                                    'The user can generate a formatted PDF of any report view.',
-                                    'The PDF includes charts, tables, and a summary narrative.',
-                                    'Reports are date-stamped and include the user\'s score at the time of generation.',
-                                ]
-                            },
-                            {
-                                id: 'rpt-export-2',
-                                label: 'User exports raw data as CSV',
-                                detail: [
-                                    'Transaction-level data can be exported as a CSV for personal record-keeping.',
-                                    'The export includes all relevant fields: date, amount, operator, category, and type.',
-                                    'Data is filtered to the selected report period before export.',
-                                ]
-                            },
-                        ]
-                    }
-                }
-            },
-            user: {
-                label: 'User',
-                icon: 'bi-person-circle',
-                description: 'User account management, preferences, authentication, and profile settings.',
-                features: {
-                    profile: {
-                        label: 'Profile Management',
-                        description: 'User can view and update their personal details and preferences',
-                        useCases: [
-                            {
-                                id: 'user-prof-1',
-                                label: 'User creates an account',
-                                detail: [
-                                    'The user registers with an email address and password, or via social login.',
-                                    'Basic profile information (name, date of birth) is collected during onboarding.',
-                                    'Age verification is performed to ensure the user meets the minimum age requirement.',
-                                ]
-                            },
-                            {
-                                id: 'user-prof-2',
-                                label: 'User updates their profile',
-                                detail: [
-                                    'The user can update their name, email, notification preferences, and other settings.',
-                                    'Changes to email require verification via a confirmation link.',
-                                    'Profile updates are logged for audit purposes.',
-                                ]
-                            },
-                            {
-                                id: 'user-prof-3',
-                                label: 'User deletes their account',
-                                detail: [
-                                    'The user can request account deletion, which triggers a confirmation flow.',
-                                    'A grace period (e.g. 30 days) allows the user to change their mind before data is permanently removed.',
-                                    'Data retention policies are followed for any legally required records.',
-                                ]
-                            },
-                        ]
-                    },
-                    auth: {
-                        label: 'Authentication & Security',
-                        description: 'Login, logout, password management, and multi-factor authentication',
-                        useCases: [
-                            {
-                                id: 'user-auth-1',
-                                label: 'User logs in',
-                                detail: [
-                                    'The user authenticates with email/password or a social login provider.',
-                                    'Multi-factor authentication (MFA) can be enabled for added security.',
-                                    'Failed login attempts are rate-limited and logged.',
-                                ]
-                            },
-                            {
-                                id: 'user-auth-2',
-                                label: 'User resets their password',
-                                detail: [
-                                    'The user requests a password reset via their registered email.',
-                                    'A time-limited reset link is sent to their inbox.',
-                                    'After resetting, all existing sessions are invalidated for security.',
-                                ]
-                            },
-                            {
-                                id: 'user-auth-3',
-                                label: 'User enables multi-factor authentication',
-                                detail: [
-                                    'The user can enable MFA using an authenticator app or SMS.',
-                                    'Backup codes are provided in case the primary MFA method is unavailable.',
-                                    'MFA settings can be managed from the security section of the profile.',
-                                ]
-                            },
-                        ]
-                    },
-                    prefs: {
-                        label: 'Notification Preferences',
-                        description: 'Controls how and when the user receives notifications',
-                        useCases: [
-                            {
-                                id: 'user-prefs-1',
-                                label: 'User configures notification channels',
-                                detail: [
-                                    'The user can choose to receive notifications via push, email, or SMS.',
-                                    'Each notification type (budget alerts, score changes, reports) can be configured independently.',
-                                    'The user can set quiet hours during which non-critical notifications are suppressed.',
-                                ]
-                            },
-                            {
-                                id: 'user-prefs-2',
-                                label: 'User opts out of specific notifications',
-                                detail: [
-                                    'Individual notification types can be disabled without affecting others.',
-                                    'Critical safety notifications (e.g. support resources) cannot be fully disabled but can be reduced in frequency.',
-                                    'Preferences are synced across all devices.',
                                 ]
                             },
                         ]
@@ -1136,6 +1152,103 @@
                         ]
                     }
                 }
+            },
+            user: {
+                label: 'User',
+                icon: 'bi-person-circle',
+                description: 'User account management, preferences, authentication, and profile settings.',
+                features: {
+                    profile: {
+                        label: 'Profile Management',
+                        description: 'User can view and update their personal details and preferences',
+                        useCases: [
+                            {
+                                id: 'user-prof-1',
+                                label: 'User creates an account',
+                                detail: [
+                                    'The user registers with an email address and password, or via social login.',
+                                    'Basic profile information (name, date of birth) is collected during onboarding.',
+                                    'Age verification is performed to ensure the user meets the minimum age requirement.',
+                                ]
+                            },
+                            {
+                                id: 'user-prof-2',
+                                label: 'User updates their profile',
+                                detail: [
+                                    'The user can update their name, email, notification preferences, and other settings.',
+                                    'Changes to email require verification via a confirmation link.',
+                                    'Profile updates are logged for audit purposes.',
+                                ]
+                            },
+                            {
+                                id: 'user-prof-3',
+                                label: 'User deletes their account',
+                                detail: [
+                                    'The user can request account deletion, which triggers a confirmation flow.',
+                                    'A grace period (e.g. 30 days) allows the user to change their mind before data is permanently removed.',
+                                    'Data retention policies are followed for any legally required records.',
+                                ]
+                            },
+                        ]
+                    },
+                    auth: {
+                        label: 'Authentication & Security',
+                        description: 'Login, logout, password management, and multi-factor authentication',
+                        useCases: [
+                            {
+                                id: 'user-auth-1',
+                                label: 'User logs in',
+                                detail: [
+                                    'The user authenticates with email/password or a social login provider.',
+                                    'Multi-factor authentication (MFA) can be enabled for added security.',
+                                    'Failed login attempts are rate-limited and logged.',
+                                ]
+                            },
+                            {
+                                id: 'user-auth-2',
+                                label: 'User resets their password',
+                                detail: [
+                                    'The user requests a password reset via their registered email.',
+                                    'A time-limited reset link is sent to their inbox.',
+                                    'After resetting, all existing sessions are invalidated for security.',
+                                ]
+                            },
+                            {
+                                id: 'user-auth-3',
+                                label: 'User enables multi-factor authentication',
+                                detail: [
+                                    'The user can enable MFA using an authenticator app or SMS.',
+                                    'Backup codes are provided in case the primary MFA method is unavailable.',
+                                    'MFA settings can be managed from the security section of the profile.',
+                                ]
+                            },
+                        ]
+                    },
+                    prefs: {
+                        label: 'Notification Preferences',
+                        description: 'Controls how and when the user receives notifications',
+                        useCases: [
+                            {
+                                id: 'user-prefs-1',
+                                label: 'User configures notification channels',
+                                detail: [
+                                    'The user can choose to receive notifications via push, email, or SMS.',
+                                    'Each notification type (budget alerts, score changes, reports) can be configured independently.',
+                                    'The user can set quiet hours during which non-critical notifications are suppressed.',
+                                ]
+                            },
+                            {
+                                id: 'user-prefs-2',
+                                label: 'User opts out of specific notifications',
+                                detail: [
+                                    'Individual notification types can be disabled without affecting others.',
+                                    'Critical safety notifications (e.g. support resources) cannot be fully disabled but can be reduced in frequency.',
+                                    'Preferences are synced across all devices.',
+                                ]
+                            },
+                        ]
+                    }
+                }
             }
         };
 
@@ -1148,6 +1261,7 @@
         function init() {
             renderDomains();
             updateStats();
+            renderTodos();
         }
 
         function updateStats() {
@@ -1253,6 +1367,57 @@
                 ${detailHtml}
             </div>
         `;
+        }
+
+        // ── Navigate to Use Case (from Todo) ────────────
+        function navigateToUseCase(domainKey, featureKey, ucId) {
+            selectDomain(domainKey);
+            selectFeature(domainKey, featureKey);
+            selectUseCase(domainKey, featureKey, ucId);
+            document.querySelector('.explorer-wrapper').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ── Render Todos ─────────────────────────────────
+        function renderTodos() {
+            const todos = [];
+            for (const [dk, domain] of Object.entries(domains)) {
+                for (const [fk, feature] of Object.entries(domain.features)) {
+                    for (const uc of feature.useCases) {
+                        for (const text of uc.detail) {
+                            if (text.startsWith('TODO')) {
+                                todos.push({
+                                    domainKey: dk,
+                                    featureKey: fk,
+                                    ucId: uc.id,
+                                    domain: domain.label,
+                                    feature: feature.label,
+                                    useCase: uc.label,
+                                    text: text,
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+
+            const section = document.getElementById('todo-section');
+            const list = document.getElementById('todo-list');
+
+            if (todos.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+
+            section.style.display = 'block';
+            list.innerHTML = todos.map(t => `
+                <div class="todo-item" style="cursor:pointer;" onclick="navigateToUseCase('${t.domainKey}','${t.featureKey}','${t.ucId}')">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <div>
+                        <div class="todo-path">${t.domain} / ${t.feature} / ${t.useCase}</div>
+                        <div class="todo-text">${t.text.replace(/^TODO:?\s*/, '')}</div>
+                    </div>
+                </div>
+            `).join('');
         }
 
         // ── Bootstrap ────────────────────────────────────
