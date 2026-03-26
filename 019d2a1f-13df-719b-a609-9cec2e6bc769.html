@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GamScore — Product Feature Explorer</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        /* ── GamScore Design Tokens ──────────────────────── */
+        :root {
+            --gs-dark-blue: #0A0F2D;
+            --gs-light-blue: #5DCCFA;
+            --gs-body-bg: #f8f9fa;
+            --gs-card-bg: #ffffff;
+            --gs-border: #dee2e6;
+            --gs-text: #0A0F2D;
+            --gs-text-secondary: #6c757d;
+            --gs-text-tertiary: #adb5bd;
+            --gs-accent: #1b6ec2;
+            --gs-accent-soft: #e8f4fd;
+            --gs-success: #198754;
+            --gs-success-bg: #d1e7dd;
+            --gs-warning: #cc8400;
+            --gs-warning-bg: #fff3cd;
+            --gs-danger: #dc3545;
+            --gs-danger-bg: #f8d7da;
+            --gs-info: #0d6efd;
+            --gs-info-bg: #cfe2ff;
+            --gs-purple: #534AB7;
+            --gs-purple-bg: #f3f0ff;
+        }
+
+        /* ── Base ────────────────────────────────────────── */
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scrollbar-color: var(--gs-light-blue) var(--gs-dark-blue);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--gs-dark-blue);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gs-light-blue);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3ab8e8;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gs-body-bg);
+            color: var(--gs-text);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Navbar ──────────────────────────────────────── */
+        .navbar-gamscore {
+            background-color: var(--gs-dark-blue);
+        }
+
+        .navbar-gamscore .navbar-brand,
+        .navbar-gamscore .nav-link {
+            color: #fff;
+        }
+
+        .navbar-gamscore .nav-link:hover {
+            color: var(--gs-light-blue);
+        }
+
+        .breadcrumb-bar {
+            background-color: var(--gs-light-blue);
+            padding: 0.4rem 0;
+        }
+
+        .breadcrumb-bar .breadcrumb {
+            margin: 0;
+            background: none;
+        }
+
+        .breadcrumb-bar .breadcrumb-item,
+        .breadcrumb-bar .breadcrumb-item.active,
+        .breadcrumb-bar .breadcrumb-item+.breadcrumb-item::before {
+            color: var(--gs-dark-blue) !important;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        /* ── Main Layout ─────────────────────────────────── */
+        .explorer-wrapper {
+            flex: 1;
+            padding: 1.25rem 1.5rem 2rem;
+            overflow: hidden;
+        }
+
+        .page-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--gs-dark-blue);
+        }
+
+        .columns {
+            display: grid;
+            grid-template-columns: 1fr 24px 1fr 24px 1fr 24px 1.4fr;
+            gap: 0;
+        }
+
+        .col-panel {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .col-head {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--gs-text-tertiary);
+            padding: 0 0 10px 2px;
+            flex-shrink: 0;
+        }
+
+        .col-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 4px;
+            padding-top: 2px;
+        }
+
+        .col-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .col-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .col-scroll::-webkit-scrollbar-thumb {
+            background: var(--gs-text-tertiary);
+            border-radius: 2px;
+        }
+
+        /* ── Arrow Columns ───────────────────────────────── */
+        .arrow-col {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 28px;
+        }
+
+        .arrow-svg {
+            width: 20px;
+            opacity: 0.35;
+        }
+
+        /* ── Cards ────────────────────────────────────────── */
+        .explorer-card {
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: border-color 0.15s, transform 0.1s, box-shadow 0.15s;
+            border: 1.5px solid var(--gs-border);
+            background: var(--gs-card-bg);
+        }
+
+        .explorer-card:hover {
+            border-color: var(--gs-light-blue);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(10, 15, 45, 0.08);
+        }
+
+        .explorer-card.active {
+            border-color: var(--gs-light-blue);
+            background: var(--gs-accent-soft);
+            box-shadow: 0 0 0 3px rgba(93, 204, 250, 0.18);
+        }
+
+        .explorer-card .card-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gs-text);
+        }
+
+        .explorer-card .card-sub {
+            font-size: 11.5px;
+            color: var(--gs-text-secondary);
+            margin-top: 3px;
+            line-height: 1.45;
+        }
+
+        .explorer-card .card-icon {
+            font-size: 15px;
+            color: var(--gs-light-blue);
+            margin-right: 8px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        /* ── Domain cards (special) ──────────────────────── */
+        .domain-card .card-label::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .domain-card[data-domain="budget"] .card-label::before {
+            background: #0d6efd;
+        }
+
+        .domain-card[data-domain="transactions"] .card-label::before {
+            background: #198754;
+        }
+
+        .domain-card[data-domain="accounts"] .card-label::before {
+            background: #6f42c1;
+        }
+
+        .domain-card[data-domain="notifications"] .card-label::before {
+            background: #fd7e14;
+        }
+
+        /* ── Detail Panel ────────────────────────────────── */
+        .detail-area {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .detail-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .detail-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .detail-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .detail-scroll::-webkit-scrollbar-thumb {
+            background: var(--gs-text-tertiary);
+            border-radius: 2px;
+        }
+
+        .detail-section {
+            background: var(--gs-card-bg);
+            border: 1.5px solid var(--gs-border);
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+        }
+
+        .detail-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--gs-text-tertiary);
+            margin-bottom: 10px;
+        }
+
+        .tech-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 6px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 12px;
+        }
+
+        .tech-item:last-child {
+            border-bottom: none;
+        }
+
+        .tech-tag {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 7px;
+            border-radius: 4px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            margin-top: 1px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .tag-entity {
+            background: var(--gs-warning-bg);
+            color: var(--gs-warning);
+        }
+
+        .tag-api {
+            background: var(--gs-success-bg);
+            color: var(--gs-success);
+        }
+
+        .tag-logic {
+            background: var(--gs-info-bg);
+            color: var(--gs-info);
+        }
+
+        .tag-event {
+            background: var(--gs-danger-bg);
+            color: var(--gs-danger);
+        }
+
+        .tag-svc {
+            background: var(--gs-purple-bg);
+            color: var(--gs-purple);
+        }
+
+        .tech-desc {
+            color: var(--gs-text-secondary);
+            line-height: 1.5;
+        }
+
+        /* ── Hint ────────────────────────────────────────── */
+        .hint {
+            font-size: 12px;
+            color: var(--gs-text-tertiary);
+            text-align: center;
+            padding: 40px 12px;
+            line-height: 1.6;
+        }
+
+        .hint i {
+            font-size: 22px;
+            display: block;
+            margin-bottom: 6px;
+            opacity: 0.5;
+        }
+
+        /* Use-case description */
+        .uc-context {
+            font-size: 12px;
+            color: var(--gs-text-secondary);
+            line-height: 1.65;
+            padding: 8px 0;
+        }
+
+        .uc-context strong {
+            font-weight: 600;
+            color: var(--gs-text);
+        }
+
+        /* ── Footer ──────────────────────────────────────── */
+        .gs-footer {
+            background: var(--gs-body-bg);
+            border-top: 1px solid var(--gs-border);
+            padding: 0.75rem 0;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--gs-text-secondary);
+        }
+
+        /* ── Stats bar ───────────────────────────────────── */
+        .stats-bar {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-chip {
+            font-size: 12px;
+            color: var(--gs-text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-chip .stat-value {
+            font-weight: 700;
+            color: var(--gs-dark-blue);
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ── Navbar ──────────────────────────────────── -->
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-dark navbar-gamscore border-bottom mb-0">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <span class="fw-bold">Gam</span>Score <span class="fw-light">| Product Features</span>
+                </a>
+            </div>
+        </nav>
+        <nav class="breadcrumb-bar" aria-label="breadcrumb">
+            <div class="container-fluid">
+                <ol class="breadcrumb breadcrumb-chevron p-1 m-0">
+                    <li class="breadcrumb-item"><i class="bi bi-house-door-fill"></i></li>
+                    <li class="breadcrumb-item active">Feature Explorer</li>
+                </ol>
+            </div>
+        </nav>
+    </header>
+
+    <!-- ── Main Content ───────────────────────────── -->
+    <div class="explorer-wrapper">
+        <div class="d-flex align-items-center justify-content-between flex-wrap mb-1">
+            <div class="page-title"><i class="bi bi-columns-gap me-2" style="color:var(--gs-light-blue)"></i>Product Feature Explorer</div>
+        </div>
+
+        <div class="stats-bar" id="stats-bar">
+            <div class="stat-chip"><span class="stat-value" id="stat-domains">0</span> Domains</div>
+            <div class="stat-chip"><span class="stat-value" id="stat-features">0</span> Features</div>
+            <div class="stat-chip"><span class="stat-value" id="stat-usecases">0</span> Use Cases</div>
+        </div>
+
+        <div class="columns">
+            <!-- Col 1: Business Domain -->
+            <div class="col-panel">
+                <div class="col-head">Business Domain</div>
+                <div class="col-scroll" id="domain-area"></div>
+            </div>
+
+            <div class="arrow-col">
+                <svg class="arrow-svg" viewBox="0 0 24 24" fill="none">
+                    <path d="M4 12 L18 12 M14 8 L20 12 L14 16" stroke="var(--gs-text-tertiary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </div>
+
+            <!-- Col 2: Business Feature -->
+            <div class="col-panel">
+                <div class="col-head">Business Feature</div>
+                <div class="col-scroll" id="feature-area">
+                    <div class="hint"><i class="bi bi-arrow-left-circle"></i>Select a domain to see its features</div>
+                </div>
+            </div>
+
+            <div class="arrow-col">
+                <svg class="arrow-svg" viewBox="0 0 24 24" fill="none">
+                    <path d="M4 12 L18 12 M14 8 L20 12 L14 16" stroke="var(--gs-text-tertiary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </div>
+
+            <!-- Col 3: Use Case -->
+            <div class="col-panel">
+                <div class="col-head">Use Case</div>
+                <div class="col-scroll" id="usecase-area">
+                    <div class="hint"><i class="bi bi-arrow-left-circle"></i>Select a feature to see use cases</div>
+                </div>
+            </div>
+
+            <div class="arrow-col">
+                <svg class="arrow-svg" viewBox="0 0 24 24" fill="none">
+                    <path d="M4 12 L18 12 M14 8 L20 12 L14 16" stroke="var(--gs-text-tertiary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </div>
+
+            <!-- Col 4: Detail -->
+            <div class="detail-area col-panel">
+                <div class="col-head">Detail</div>
+                <div class="detail-scroll" id="detail-area">
+                    <div class="hint"><i class="bi bi-arrow-left-circle"></i>Select a use case to see details</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Footer ─────────────────────────────────── -->
+    <footer class="gs-footer">
+        &copy; 2026 — GamScore Product Feature Explorer
+    </footer>
+
+    <!-- ── Data & Logic ───────────────────────────── -->
+    <script>
+        // ══════════════════════════════════════════════════
+        // DATA MODEL
+        // Each domain contains features, each feature has use cases,
+        // each use case has technical detail items.
+        // ══════════════════════════════════════════════════
+        const domains = {
+            budget: {
+                label: 'Budget',
+                icon: 'bi-wallet2',
+                description: 'Manage spending limits, recommendations, tracking and alerts',
+                features: {
+                    set: {
+                        label: 'Budget Setting',
+                        description: 'User defines spending limits per category',
+                        useCases: [
+                            {
+                                id: 'set-1',
+                                label: 'User creates a budget for a new category',
+                                detail: [
+                                    { tag: 'entity', text: 'UserBudget — amount, category, period, timestamps' },
+                                    { tag: 'api', text: 'POST /budgets with validation (positive, valid category/period)' },
+                                    { tag: 'logic', text: 'Duplicate check — one budget per category per period' },
+                                ]
+                            },
+                            {
+                                id: 'set-2',
+                                label: 'User edits an existing budget',
+                                detail: [
+                                    { tag: 'api', text: 'PUT /budgets/:id with ownership check' },
+                                    { tag: 'event', text: 'budget.updated event → triggers remaining recalculation' },
+                                    { tag: 'logic', text: 'Divergence check fires after save' },
+                                ]
+                            },
+                            {
+                                id: 'set-3',
+                                label: 'User deletes a budget',
+                                detail: [
+                                    { tag: 'api', text: 'DELETE /budgets/:id, soft-delete for history' },
+                                    { tag: 'logic', text: 'Cascade: clear associated notification thresholds' },
+                                ]
+                            },
+                        ]
+                    },
+                    rec: {
+                        label: 'Recommendation Engine',
+                        description: 'Calculates suggested budget from transaction history',
+                        useCases: [
+                            {
+                                id: 'rec-1',
+                                label: 'System generates initial recommendations on first login',
+                                detail: [
+                                    { tag: 'svc', text: 'Transaction aggregation — group by category × period' },
+                                    { tag: 'logic', text: 'Rolling 3-month average or median spend calculation' },
+                                    { tag: 'entity', text: 'RecommendedBudget — separate from UserBudget, with confidence score' },
+                                ]
+                            },
+                            {
+                                id: 'rec-2',
+                                label: 'User requests refresh after new transactions sync',
+                                detail: [
+                                    { tag: 'event', text: 'transactions.synced event → triggers recalculation pipeline' },
+                                    { tag: 'svc', text: 'Diff check — only resurface recommendation if delta > threshold' },
+                                    { tag: 'api', text: 'POST /recommendations/refresh (manual trigger)' },
+                                ]
+                            },
+                            {
+                                id: 'rec-3',
+                                label: 'User accepts or dismisses a recommendation',
+                                detail: [
+                                    { tag: 'entity', text: 'status flag on RecommendedBudget: accepted | dismissed | pending' },
+                                    { tag: 'api', text: 'PATCH /recommendations/:id { status }' },
+                                    { tag: 'logic', text: 'On accept: pre-fill UserBudget form with recommended amount' },
+                                ]
+                            },
+                        ]
+                    },
+                    rem: {
+                        label: 'Remaining Budget Tracking',
+                        description: 'Shows real-time spend vs budget in each category',
+                        useCases: [
+                            {
+                                id: 'rem-1',
+                                label: 'User views remaining budget mid-period',
+                                detail: [
+                                    { tag: 'logic', text: 'remaining = userBudget.amount − Σ(transactions in period) — derived, not stored' },
+                                    { tag: 'api', text: 'GET /budgets/:id/remaining — computed on read or from cache' },
+                                    { tag: 'svc', text: 'Period boundary logic — handle month/week/custom ranges' },
+                                ]
+                            },
+                            {
+                                id: 'rem-2',
+                                label: 'User receives alert when approaching limit',
+                                detail: [
+                                    { tag: 'svc', text: 'Notification service — threshold triggers at 80%, 100%, 110%' },
+                                    { tag: 'event', text: 'budget.threshold_crossed event → push/email dispatch' },
+                                    { tag: 'entity', text: 'NotificationPreference — per user, per threshold, per channel' },
+                                ]
+                            },
+                            {
+                                id: 'rem-3',
+                                label: 'System recalculates after a new transaction syncs',
+                                detail: [
+                                    { tag: 'event', text: 'transaction.created event → invalidate remaining cache' },
+                                    { tag: 'svc', text: 'Real-time or near-real-time via event-driven pipeline (webhook / polling)' },
+                                    { tag: 'logic', text: 'Open Banking / bank API integration feeds transaction stream' },
+                                ]
+                            },
+                        ]
+                    },
+                    con: {
+                        label: 'Conflict & Divergence Alerts',
+                        description: 'Warns when user budget differs significantly from recommendation',
+                        useCases: [
+                            {
+                                id: 'con-1',
+                                label: 'User sets budget far below typical spend',
+                                detail: [
+                                    { tag: 'logic', text: 'Divergence check: |userBudget − recommended| / recommended > 30%' },
+                                    { tag: 'api', text: 'Warning payload returned inline on POST/PUT /budgets' },
+                                    { tag: 'svc', text: 'UI nudge state — soft warning, not a hard block' },
+                                ]
+                            },
+                            {
+                                id: 'con-2',
+                                label: 'User ignores recommendation — system respects but logs',
+                                detail: [
+                                    { tag: 'entity', text: 'DivergenceLog — userBudget, recommended, delta, timestamp' },
+                                    { tag: 'logic', text: 'UserBudget.overrideReason optional field for analytics' },
+                                    { tag: 'svc', text: 'Recommendation stays surfaced until dismissed explicitly' },
+                                ]
+                            },
+                            {
+                                id: 'con-3',
+                                label: 'User asks why the budget is recommended',
+                                detail: [
+                                    { tag: 'logic', text: 'Explainability layer: "based on your last 3 months averaging £X"' },
+                                    { tag: 'api', text: 'GET /recommendations/:id/explanation — returns contributing transactions' },
+                                    { tag: 'svc', text: 'Optional: percentile context ("higher than 70% of similar users")' },
+                                ]
+                            },
+                        ]
+                    }
+                }
+            }
+        };
+
+        // Tag display labels
+        const tagLabels = { entity: 'Entity', api: 'API', logic: 'Logic', event: 'Event', svc: 'Service' };
+
+        // ── State ────────────────────────────────────────
+        let currentDomain = null;
+        let currentFeature = null;
+        let currentUseCase = null;
+
+        // ── Init ─────────────────────────────────────────
+        function init() {
+            renderDomains();
+            updateStats();
+        }
+
+        function updateStats() {
+            let domainCount = 0, featureCount = 0, useCaseCount = 0;
+            for (const dk of Object.keys(domains)) {
+                domainCount++;
+                for (const fk of Object.keys(domains[dk].features)) {
+                    featureCount++;
+                    useCaseCount += domains[dk].features[fk].useCases.length;
+                }
+            }
+            document.getElementById('stat-domains').textContent = domainCount;
+            document.getElementById('stat-features').textContent = featureCount;
+            document.getElementById('stat-usecases').textContent = useCaseCount;
+        }
+
+        // ── Render Domains ───────────────────────────────
+        function renderDomains() {
+            const area = document.getElementById('domain-area');
+            area.innerHTML = Object.entries(domains).map(([key, d]) => `
+            <div class="explorer-card domain-card" data-domain="${key}" id="domain-${key}" onclick="selectDomain('${key}')">
+                <div class="d-flex align-items-start">
+                    <i class="bi ${d.icon} card-icon"></i>
+                    <div>
+                        <div class="card-label">${d.label}</div>
+                        <div class="card-sub">${d.description}</div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        }
+
+        // ── Select Domain ────────────────────────────────
+        function selectDomain(domainKey) {
+            currentDomain = domainKey;
+            currentFeature = null;
+            currentUseCase = null;
+
+            // Highlight
+            document.querySelectorAll('#domain-area .explorer-card').forEach(c => c.classList.remove('active'));
+            document.getElementById('domain-' + domainKey).classList.add('active');
+
+            // Render features
+            const features = domains[domainKey].features;
+            const area = document.getElementById('feature-area');
+            area.innerHTML = Object.entries(features).map(([key, f]) => `
+            <div class="explorer-card" id="feature-${key}" onclick="selectFeature('${domainKey}','${key}')">
+                <div class="card-label">${f.label}</div>
+                <div class="card-sub">${f.description}</div>
+            </div>
+        `).join('');
+
+            // Reset downstream
+            document.getElementById('usecase-area').innerHTML = '<div class="hint"><i class="bi bi-arrow-left-circle"></i>Select a feature to see use cases</div>';
+            document.getElementById('detail-area').innerHTML = '<div class="hint"><i class="bi bi-arrow-left-circle"></i>Select a use case to see details</div>';
+        }
+
+        // ── Select Feature ───────────────────────────────
+        function selectFeature(domainKey, featureKey) {
+            currentFeature = featureKey;
+            currentUseCase = null;
+
+            // Highlight
+            document.querySelectorAll('#feature-area .explorer-card').forEach(c => c.classList.remove('active'));
+            document.getElementById('feature-' + featureKey).classList.add('active');
+
+            // Render use cases
+            const feature = domains[domainKey].features[featureKey];
+            const area = document.getElementById('usecase-area');
+            area.innerHTML = feature.useCases.map(uc => `
+            <div class="explorer-card" id="uc-${uc.id}" onclick="selectUseCase('${domainKey}','${featureKey}','${uc.id}')">
+                <div class="card-label">${uc.label}</div>
+            </div>
+        `).join('');
+
+            // Reset detail
+            document.getElementById('detail-area').innerHTML = '<div class="hint"><i class="bi bi-arrow-left-circle"></i>Select a use case to see details</div>';
+        }
+
+        // ── Select Use Case ──────────────────────────────
+        function selectUseCase(domainKey, featureKey, ucId) {
+            currentUseCase = ucId;
+
+            // Highlight
+            document.querySelectorAll('#usecase-area .explorer-card').forEach(c => c.classList.remove('active'));
+            document.getElementById('uc-' + ucId).classList.add('active');
+
+            const feature = domains[domainKey].features[featureKey];
+            const uc = feature.useCases.find(u => u.id === ucId);
+            const area = document.getElementById('detail-area');
+
+            // Build detail HTML
+            const techHtml = uc.detail.map(item => `
+            <div class="tech-item">
+                <span class="tech-tag tag-${item.tag}">${tagLabels[item.tag]}</span>
+                <span class="tech-desc">${item.text}</span>
+            </div>
+        `).join('');
+
+            area.innerHTML = `
+            <div class="detail-section">
+                <div class="detail-section-title">Use Case</div>
+                <div class="uc-context">
+                    <strong>${uc.label}</strong><br/>
+                    This use case sits within <strong>${feature.label}</strong> in the <strong>${domains[domainKey].label}</strong> domain.
+                    It captures the <em>actor</em> (user or system), the <em>trigger</em>, and the <em>expected outcome</em> —
+                    forming the contract between product and engineering.
+                </div>
+            </div>
+            <div class="detail-section">
+                <div class="detail-section-title">Technical Details</div>
+                ${techHtml}
+            </div>
+        `;
+        }
+
+        // ── Bootstrap ────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>
