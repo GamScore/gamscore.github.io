@@ -900,16 +900,16 @@
                         useCases: [
                             {
                                 id: 'rpt-sum-1',
-                                label: 'User views a weekly or monthly activity summary',
+                                label: 'User views activity summary',
                                 detail: [
                                     'The summary shows total spend, number of transactions, and net position for the selected period.',
-                                    'Key metrics are compared against the previous period to show trends.',
-                                    'The summary is available on-demand and can also be sent as a scheduled notification.',
+                                    'Weekly, monthly, and yearly summaries are available.',
+                                    'TODO: Do we want to compare against previous period?'
                                 ]
                             },
                             {
                                 id: 'rpt-sum-2',
-                                label: 'User views spending by operator or category',
+                                label: 'User views spending by operator',
                                 detail: [
                                     'Spending is broken down by gambling operator, type (e.g. sports, casino, lottery), or payment method.',
                                     'Visualisations such as pie charts or bar charts make the data easy to interpret.',
@@ -1257,11 +1257,33 @@
         let currentFeature = null;
         let currentUseCase = null;
 
+        // ── URL Hash ─────────────────────────────────────
+        function updateHash() {
+            const parts = [currentDomain, currentFeature, currentUseCase].filter(Boolean);
+            history.replaceState(null, '', parts.length ? '#' + parts.join('/') : location.pathname);
+        }
+
+        function restoreFromHash() {
+            const hash = location.hash.replace('#', '');
+            if (!hash) return;
+            const [dk, fk, ucId] = hash.split('/');
+            if (dk && domains[dk]) {
+                selectDomain(dk);
+                if (fk && domains[dk].features[fk]) {
+                    selectFeature(dk, fk);
+                    if (ucId && domains[dk].features[fk].useCases.find(u => u.id === ucId)) {
+                        selectUseCase(dk, fk, ucId);
+                    }
+                }
+            }
+        }
+
         // ── Init ─────────────────────────────────────────
         function init() {
             renderDomains();
             updateStats();
             renderTodos();
+            restoreFromHash();
         }
 
         function updateStats() {
@@ -1317,6 +1339,7 @@
             // Reset downstream
             document.getElementById('usecase-area').innerHTML = '<div class="hint"><i class="bi bi-arrow-left-circle"></i>Select a feature to see use cases</div>';
             document.getElementById('detail-area').innerHTML = '<div class="hint"><i class="bi bi-arrow-left-circle"></i>Select a use case to see details</div>';
+            updateHash();
         }
 
         // ── Select Feature ───────────────────────────────
@@ -1339,6 +1362,7 @@
 
             // Reset detail
             document.getElementById('detail-area').innerHTML = '<div class="hint"><i class="bi bi-arrow-left-circle"></i>Select a use case to see details</div>';
+            updateHash();
         }
 
         // ── Select Use Case ──────────────────────────────
@@ -1367,6 +1391,7 @@
                 ${detailHtml}
             </div>
         `;
+            updateHash();
         }
 
         // ── Navigate to Use Case (from Todo) ────────────
